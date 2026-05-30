@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PortalTrace — Live</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    // Set these values before deploying
+    window.PORTALTRACE_RUNTIME = {
+      rpcEndpoint: 'wss://rpc.portaldot.io',
+      contractAddress: '', // <-- put deployed contract SS58 here
+      contractMetadataUrl: '/assets/portaltrace.contract.json', // upload after build
+      tokenSymbol: 'POT'
+    };
+  </script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <div class="navbar-logo"><div class="navbar-logo-icon">◆</div><span>PortalTrace</span></div>
+      <div class="navbar-nav">
+        <a href="index.html" class="active">Register</a>
+        <a href="verify.html">Verify</a>
+        <button id="connectWalletBtn" class="btn btn-primary btn-sm">Connect Wallet</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content container">
+      <h1>PortalTrace</h1>
+      <p>Register product batches and verify authenticity on Portaldot</p>
+      <div class="hero-buttons">
+        <button class="btn btn-primary" onclick="document.getElementById('registerSection').scrollIntoView({behavior:'smooth'})">Register Product</button>
+        <a href="verify.html" class="btn btn-outline">Verify</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container"><div id="alertContainer" style="margin-top:1rem"></div></div>
+
+  <section id="registerSection" class="section container">
+    <div class="card" style="max-width:720px;margin:0 auto;">
+      <form id="registerForm">
+        <div class="form-group"><label class="form-label">Product Name</label><input id="productName" required></div>
+        <div class="form-row"><div class="form-group"><label class="form-label">Manufacturer</label><input id="manufacturer" required></div><div class="form-group"><label class="form-label">Origin</label><input id="origin" required></div></div>
+        <div class="form-group"><label class="form-label">IPFS Hash (optional)</label><input id="ipfsHash" placeholder="Qm..." /></div>
+        <button type="submit" class="btn btn-primary btn-block">Register on Blockchain</button>
+      </form>
+    </div>
+
+    <div style="margin-top:1.5rem">
+      <h2>Recent On-chain Products</h2>
+      <div id="productsContainer" class="products-grid"></div>
+    </div>
+  </section>
+
+  <footer class="container" style="text-align:center;padding:2rem 0;color:#9aa4b2">
+    © PortalTrace — Portaldot (POT gas)
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
