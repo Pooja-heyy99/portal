@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PortalTrace — Verify</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    window.PORTALTRACE_RUNTIME = {
+      rpcEndpoint: 'wss://rpc.portaldot.io',
+      contractAddress: '',
+      contractMetadataUrl: '/assets/portaltrace.contract.json',
+      tokenSymbol: 'POT'
+    };
+  </script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container navbar-content">
+      <div class="navbar-logo"><div class="navbar-logo-icon">◆</div><span>PortalTrace</span></div>
+      <div class="navbar-nav">
+        <a href="index.html">Register</a>
+        <a href="verify.html" class="active">Verify</a>
+        <button id="connectWalletBtn" class="btn btn-primary btn-sm">Connect Wallet</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content container">
+      <h1>Verify Product Authenticity</h1>
+      <p>Check a product record directly from Portaldot</p>
+    </div>
+  </section>
+
+  <div class="container"><div id="alertContainer" style="margin-top:1rem"></div></div>
+
+  <section class="section container">
+    <div class="card" style="max-width:720px;margin:0 auto;">
+      <h3 style="text-align:center;margin-bottom:1rem;">Enter Product ID</h3>
+      <form id="verifyForm">
+        <div class="form-group">
+          <label class="form-label">Product ID</label>
+          <input id="productId" type="number" min="1" placeholder="e.g. 1" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Verify Product</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="detailsSection" class="section container" style="display:none;">
+    <div class="card" style="max-width:900px;margin:0 auto 1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <h2 id="detailsName" style="margin-bottom:.25rem;">Loading...</h2>
+          <p id="detailsId" style="color:var(--muted);">Product ID: --</p>
+        </div>
+        <div id="verificationBadge" class="badge badge-verified">✓ Verified</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;">
+        <div><p class="form-label">Manufacturer</p><p id="detailsManufacturer">--</p></div>
+        <div><p class="form-label">Origin</p><p id="detailsOrigin">--</p></div>
+        <div><p class="form-label">IPFS Hash</p><p id="detailsIpfs" style="word-break:break-all;">--</p></div>
+        <div><p class="form-label">Current Owner</p><p id="detailsOwner" style="word-break:break-all;">--</p></div>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:900px;margin:0 auto 1.5rem;text-align:center;">
+      <h4 style="margin-bottom:1rem;">Product QR Code</h4>
+      <div style="display:flex;justify-content:center;">
+        <canvas id="qrCode" width="240" height="240"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:900px;margin:0 auto;">
+      <h4 style="margin-bottom:1rem;">Ownership History</h4>
+      <div id="ownershipHistory">
+        <p style="color:#9aa4b2;">No product loaded yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="featuresSection" class="section container">
+    <div class="grid grid-3">
+      <div class="card"><h4>Origin</h4><p>Verify manufacturer and origin from the on-chain record.</p></div>
+      <div class="card"><h4>Ownership</h4><p>See the current owner stored in the contract.</p></div>
+      <div class="card"><h4>Metadata</h4><p>View the product's IPFS pointer for supporting documents.</p></div>
+    </div>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
