@@ -1,573 +1,207 @@
-# PortalTrace 🔗
-
-**Supply Chain Transparency dApp built on Portaldot**
-
-A hackathon-ready Web3 application for transparent, immutable product registration, ownership transfer, and authenticity verification on the blockchain.
-
----
-
-## 🎯 Problem
-
-Modern supply chains suffer from:
-- **Counterfeit Products**: No way to verify authenticity
-- **Lack of Transparency**: Unclear origin and custody chain
-- **Trust Issues**: Manual records are easily manipulated
-- **Consumer Uncertainty**: No easy way to verify product genuineness
-
-## 💡 Solution
-
-**PortalTrace** leverages blockchain to create an immutable, transparent supply chain:
-- 📦 **Register products** with complete metadata on-chain
-- 🔗 **Track ownership transfers** with permanent audit trail
-- ✅ **Verify authenticity** via QR codes and blockchain confirmation
-- 📱 **Mobile-friendly** dashboard for easy access
-- 🌍 **Portaldot-powered** for scalable, eco-friendly operations
-
----
-
-## 🏗️ Architecture
-
-### Smart Contract (Rust/ink!)
-```
-PortalTrace Contract
-├── Storage
-│   ├── owner: AccountId (contract owner)
-│   └── products: Mapping<u64, Product>
-│
-├── Product Struct
-│   ├── id: u64
-│   ├── name: String
-│   ├── manufacturer: String
-│   ├── origin: String
-│   ├── ipfs_hash: String (metadata pointer)
-│   ├── owner: AccountId
-│   └── verified: bool
-│
-├── Functions
-│   ├── new() - Initialize contract
-│   ├── create_product() - Register new batch
-│   ├── transfer_product() - Change ownership
-│   ├── verify_product() - Mark as verified
-│   └── get_product() - Retrieve product data
-│
-└── Events
-    ├── ProductCreated
-    ├── ProductTransferred
-    └── ProductVerified
-```
-
-### Frontend (HTML/CSS/JavaScript)
-```
-PortalTrace Dashboard
-├── Pages
-│   ├── index.html - Product registration & listing
-│   └── verify.html - Authenticity verification
-│
-├── Features
-│   ├── Wallet connection
-│   ├── Product registration form
-│   ├── Recent products display
-│   ├── QR code generation
-│   ├── Ownership history tracking
-│   └── Responsive design (dark mode, glassmorphism)
-│
-└── Storage
-    ├── localStorage (demo fallback)
-    ├── IPFS hashes (metadata references)
-    └── Blockchain (production)
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Rust** (for smart contract development)
-- **cargo-contract** (for ink! contracts)
-  ```bash
-  cargo install cargo-contract
-  ```
-- **Web Browser** (for frontend - no dependencies needed)
-- **Node.js** (optional, for local development server)
-
-### Quick Start
-
-#### 1. Clone the Repository
-```bash
-cd PortalTrace
-```
-
-#### 2. Run Frontend (Demo Mode)
-Simply open `frontend/index.html` in your browser:
-```bash
-# Using Python 3
-python -m http.server 8000
-
-# Or using Node.js
-npx http-server frontend
-
-# Or just open directly in browser
-open frontend/index.html
-```
-
-The frontend runs entirely in the browser with **no npm install required**.
-
-#### 3. Test the Demo
-1. Click "Connect Wallet" to create a demo wallet
-2. Register a product with the form
-3. View recent products
-4. Use the "Verify" page to check product authenticity
-5. Inspect the browser's localStorage to see stored data
-
-#### 4. Build Smart Contract
-```bash
-cd contracts/portaltrace
-cargo build --release
-```
-
-Compiled contract: `target/ink/portaltrace.wasm`
-
-#### 5. Deploy to Portaldot (Production)
-```bash
-# Using cargo-contract
-cargo contract build --release
-
-# Deploy via Portaldot dashboard or CLI
-# (requires POT token access - see Deployment section)
-```
-
-### Live Portaldot Setup
-
-To switch the app from demo mode to a real on-chain flow, update these files in GitHub:
-- `frontend/config.js` for the RPC endpoint, deployed contract address, metadata path, and POT token branding.
-- `frontend/app.js` for the wallet and contract transaction logic.
-- `contracts/portaltrace/lib.rs` for the ink! contract model and on-chain behavior.
-- `frontend/index.html` and `frontend/verify.html` for the shared config loader.
-
-The frontend expects a generated contract metadata file at `frontend/assets/portaltrace.contract.json` when live mode is enabled.
-
----
-
-## 📋 Project Structure
-
-```
-PortalTrace/
-│
-├── contracts/
-│   └── portaltrace/
-│       ├── Cargo.toml          # Smart contract dependencies
-│       ├── lib.rs              # ink! contract code
-│       └── src/lib.rs          # Alternative layout
-│
-├── frontend/
-│   ├── index.html              # Registration page
-│   ├── verify.html             # Verification page
-│   ├── style.css               # Design system & responsive styles
-│   └── app.js                  # Application logic
-│
-├── assets/                      # Images, logos, etc.
-│
-├── README.md                    # This file
-├── demo-script.md              # 2-3 minute presentation script
-└── .gitignore
-```
-
----
-
-## 🎮 Usage Guide
-
-### For Product Manufacturers
-
-**Register a Product Batch:**
-1. Navigate to the "Register" page
-2. Fill in product details:
-   - Product Name (e.g., "Organic Coffee Beans")
-   - Manufacturer (e.g., "Fair Trade Coffee Co.")
-   - Origin (e.g., "Ethiopia, Addis Ababa")
-   - IPFS Hash (optional - auto-generated if empty)
-3. Click "Register on Blockchain"
-4. Product receives unique ID
-5. Share product ID or QR code with distributors
-
-**Transfer Ownership:**
-- Current owner can transfer to next party in supply chain
-- Creates permanent audit trail on blockchain
-- Only registered product owner can initiate transfer
-
-### For Consumers/Retailers
-
-**Verify Product Authenticity:**
-1. Navigate to "Verify" page
-2. Enter Product ID or scan QR code
-3. View:
-   - Product origin and manufacturer
-   - Current owner
-   - Complete ownership history
-   - Verification status
-   - IPFS metadata link
-
----
-
-## 🔐 Smart Contract Functions
-
-### `new()`
-Initializes the contract. Called once during deployment.
-
-### `create_product(name, manufacturer, origin, ipfs_hash) -> Result<u64>`
-Registers a new product batch.
-- **Parameters:**
-  - `name`: Product name
-  - `manufacturer`: Manufacturer identifier
-  - `origin`: Geographic origin
-  - `ipfs_hash`: IPFS hash for detailed metadata
-- **Returns:** Product ID (u64)
-- **Events:** Emits `ProductCreated`
-
-### `transfer_product(product_id, new_owner) -> Result<()>`
-Transfers product ownership.
-- **Parameters:**
-  - `product_id`: ID of product to transfer
-  - `new_owner`: Account of new owner
-- **Validation:** Only current owner can transfer
-- **Events:** Emits `ProductTransferred`
-
-### `verify_product(product_id) -> Result<()>`
-Marks a product as verified.
-- **Parameters:**
-  - `product_id`: ID of product to verify
-- **Events:** Emits `ProductVerified`
-
-### `get_product(product_id) -> Result<Product>`
-Retrieves product data.
-- **Parameters:**
-  - `product_id`: ID of product
-- **Returns:** Complete Product struct
-
----
-
-## 🎨 Design System
-
-**Color Palette:**
-- Primary: `#8b5cf6` (Purple)
-- Secondary: `#6366f1` (Indigo)
-- Accent: `#06b6d4` (Cyan)
-- Background: `#0f172a` (Dark Blue)
-
-**Components:**
-- Glassmorphism cards with blur effects
-- Gradient text and buttons
-- Smooth animations and transitions
-- Dark mode for reduced eye strain
-- Responsive grid layouts
-
-**Typography:**
-- System fonts for performance
-- Clear hierarchy with size and weight
-- Monospace for addresses and hashes
-
----
-
-## 📱 Browser Support
-
-- Chrome/Brave 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-No polyfills required for modern browsers.
-
----
-
-## 🔌 API Reference
-
-### JavaScript Functions
-
-#### `connectWallet()`
-Connects to blockchain wallet or creates demo wallet.
-```javascript
-await connectWallet();
-```
-
-#### `registerProduct(name, manufacturer, origin, ipfsHash)`
-Registers new product.
-```javascript
-const product = await registerProduct(
-    'Coffee',
-    'Fair Trade Co.',
-    'Ethiopia',
-    'QmXxx...'
-);
-```
-
-#### `verifyProduct(productId)`
-Verifies product authenticity.
-```javascript
-const product = await verifyProduct(1);
-```
-
-#### `transferProduct(productId, newOwner)`
-Transfers ownership (owner only).
-```javascript
-const success = await transferProduct(1, '0x...');
-```
-
-#### `getProduct(productId)`
-Retrieves product data.
-```javascript
-const product = getProduct(1);
-```
-
-#### `renderProducts()`
-Displays products list.
-```javascript
-renderProducts();
-```
-
-#### `loadDemoData()`
-Loads sample products for testing.
-```javascript
-loadDemoData();
-```
-
----
-
-## 📊 Data Models
-
-### Product
-```javascript
-{
-    id: u64,                        // Unique identifier
-    name: String,                   // Product name
-    manufacturer: String,           // Manufacturer name
-    origin: String,                 // Geographic origin
-    ipfs_hash: String,              // Metadata pointer
-    owner: AccountId,               // Current owner
-    verified: bool,                 // Verification status
-    created_at: ISO8601String       // Registration timestamp
-}
-```
-
-### OwnershipEvent
-```javascript
-{
-    timestamp: ISO8601String,       // When event occurred
-    type: "Created" | "Transferred" | "Verified",
-    actor: AccountId,               // Account that triggered event
-    details: String                 // Additional context
-}
-```
-
----
-
-## ⚡ Demo Mode vs Production
-
-### Demo Mode (Current)
-- ✅ No blockchain connection required
-- ✅ Uses localStorage for data persistence
-- ✅ No wallet needed (generates demo wallet)
-- ✅ Perfect for testing UI/UX
-- ❌ Data not immutable
-- ❌ No actual blockchain verification
-
-### Production Mode
-- ✅ Real blockchain immutability
-- ✅ Actual wallet connection (polkadot.js)
-- ✅ Tamper-proof audit trail
-- ✅ IPFS integration for metadata
-- ❌ Requires Portaldot network access
-- ❌ Requires POT tokens for deployment
-
-**To enable production mode:**
-1. Install `@polkadot/api` and `@polkadot/extension-dapp`
-2. Set `CONFIG.DEMO_MODE = false` in `app.js`
-3. Update smart contract interaction code
-4. Deploy contract to Portaldot testnet/mainnet
-
----
-
-## 📦 Deployment Instructions
-
-### Smart Contract Deployment
-
-#### Portaldot Testnet
-```bash
-# 1. Build contract
-cd contracts/portaltrace
-cargo contract build --release
-
-# 2. Upload to Portaldot
-# Use Portaldot's contract upload interface or CLI
-
-# 3. Instantiate contract
-# Call constructor with initial parameters
-```
-
-**Deployment to Portaldot pending POT token access**
-
-*This is a hackathon submission. Full deployment requires POT tokens for transaction fees. The smart contract is production-ready and fully tested.*
-
-#### Substrate-based Chains
-```bash
-# Deploy to any Substrate chain with ink! support
-# Update RPC endpoint in deployment script
-# Follow substrate.io deployment guide
-```
-
-### Frontend Deployment
-
-#### GitHub Pages
-```bash
-# Push frontend/ folder to gh-pages branch
-git branch -D gh-pages
-git subtree split --prefix frontend -b gh-pages
-git push origin gh-pages -f
-```
-
-#### Vercel / Netlify
-```bash
-# Connect repository to Vercel/Netlify
-# Configure build settings:
-#   - Root: frontend/
-#   - Build command: (none)
-#   - Publish directory: frontend/
-```
-
-#### Traditional Hosting
-```bash
-# Upload frontend/ folder to any web server
-# No build process required
-# No Node.js required
-```
-
----
-
-## 🧪 Testing
-
-### Unit Tests (Smart Contract)
-```bash
-cd contracts/portaltrace
-cargo test
-```
-
-### Frontend Testing
-Open `index.html` in browser and:
-1. Test product registration form
-2. Verify product listing updates
-3. Check localStorage persistence
-4. Test responsive design on mobile
-5. Verify QR code generation
-
-### Demo Workflow
-```javascript
-// In browser console:
-loadDemoData();          // Load sample products
-connectWallet();         // Connect wallet
-renderProducts();        // Display products
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Products not appearing
-- Check browser's localStorage (DevTools > Application > Storage)
-- Clear localStorage and reload: `localStorage.clear()`
-- Call `loadDemoData()` to load samples
-
-### Wallet connection fails
-- Make sure you're using a modern browser
-- Check browser console for errors (F12)
-- In production, install Polkadot.js wallet extension
-
-### QR codes not generating
-- Browser console should show any errors
-- QR library is built into verify.html
-- Check browser's JavaScript is enabled
-
-### Blockchain operations fail
-- Verify chain connection in browser console
-- Check account has sufficient tokens
-- Verify smart contract is deployed at correct address
-
----
-
-## 📚 Resources
-
-- **Portaldot**: https://portaldot.io
-- **ink! Documentation**: https://docs.rs/ink/
-- **Substrate Docs**: https://docs.substrate.io
-- **Polkadot.js**: https://polkadot.js.org
-
----
-
-## 🏆 Hackathon Details
-
-**Event**: Portaldot Mini Hackathon  
-**Category**: Supply Chain / Web3 DApps  
-**Tech Stack**:
-- Smart Contract: Rust + ink!
-- Frontend: HTML + CSS + Vanilla JavaScript
-- Storage: Portaldot Blockchain + IPFS
-- Network: Portaldot / Substrate-based chains
-
-**Features Completed**:
-- ✅ Full-stack dApp (frontend + smart contract)
-- ✅ Product registration on-chain
-- ✅ Ownership transfer mechanism
-- ✅ Product verification system
-- ✅ QR code generation
-- ✅ Responsive UI with modern design
-- ✅ Demo mode for testing without blockchain
-- ✅ Complete documentation
-- ✅ Ready-to-deploy smart contract
-
----
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
----
-
-## 👨‍💻 Development Notes
-
-### Code Quality
-- Smart contract includes comprehensive error handling
-- Frontend uses vanilla JS to avoid dependencies
-- All code is commented for clarity
-- Responsive design tested on mobile browsers
-
-### Performance
-- No npm dependencies (frontend)
-- Smart contract optimized for Portaldot
-- localStorage caching for faster loads
-- Efficient event emission in contract
-
-### Security Considerations
-- Ownership validation on transfers
-- HTML escaping to prevent XSS
-- No sensitive data in localStorage (demo only)
-- Production should use proper wallet integration
-
----
-
-## 🤝 Contributing
-
-This is a hackathon submission. For the submitted version, please refer to the original repository. Community improvements welcome!
-
----
-
-## 📞 Support
-
-For questions or issues:
-1. Check this README
-2. Review code comments
-3. Check browser console for errors
-4. Test with demo data
-5. Refer to linked documentation
-
----
-
-**Made with 💜 for the Portaldot Mini Hackathon**
-
-`PortalTrace` - Transparent supply chains, powered by blockchain.
+# PortalTrace
+
+PortalTrace is a Portaldot-native supply-chain transparency dApp that lets manufacturers register products on-chain, lets users verify authenticity in the browser, and uses **POT** as gas for live blockchain actions.
+
+It is built for the **Portaldot Online Mini Hackathon S1** and is designed to be a runnable MVP with a clear demo flow.
+
+## Problem
+
+Supply chains still struggle with:
+- Counterfeit products entering the market
+- Weak proof of origin
+- No simple way to verify authenticity
+- Limited chain-of-custody visibility
+- Trust based on paperwork instead of on-chain records
+
+For this hackathon, the key requirement is not just an idea. The project must be deployed on Portaldot, use **POT** for gas, and be demo-ready.
+
+## Solution
+
+PortalTrace stores product records on-chain and exposes them through a simple browser UI.
+
+With PortalTrace, a user can:
+- Connect a wallet extension
+- Register a product on-chain
+- Verify a product by ID
+- View product metadata such as name, manufacturer, origin, owner, and IPFS pointer
+
+The result is a transparent, easy-to-demo MVP that shows why Portaldot works well for real-world traceability.
+
+## Why This Fits Portaldot
+
+PortalTrace is intentionally built around the hackathon requirements:
+- **Built on Portaldot**: the app is meant to be deployed against a live Portaldot contract
+- **Uses POT as gas**: live transactions are sent through the wallet using POT
+- **Runnable MVP**: the frontend is a simple browser app with register and verify flows
+- **Demo-ready**: the flow is easy to show in a short video
+- **Open source**: the contract code stays in the repo
+
+## Features
+
+- Wallet connection via browser extension
+- Product registration on-chain
+- Product verification by product ID
+- Product detail display
+- QR code display for verification flow
+- Responsive UI for desktop and mobile
+
+## Tech Stack
+
+- **Smart contract**: Rust + ink!
+- **Network**: Portaldot
+- **Gas token**: POT
+- **Frontend**: HTML, CSS, JavaScript
+- **Wallet integration**: Polkadot.js browser extension compatibility
+
+## Architecture
+
+### Contract
+
+The contract stores product records and exposes the following actions:
+- `create_product`
+- `transfer_product`
+- `verify_product`
+- `get_product`
+- `get_next_product_id`
+
+### Frontend
+
+The deployment package contains:
+- `index.html` for registration
+- `verify.html` for verification
+- `style.css` for styling
+- `app.js` for live chain interaction
+
+## How It Works
+
+### Register Flow
+
+1. Open the app
+2. Connect the wallet
+3. Enter product name, manufacturer, and origin
+4. Send the registration transaction
+5. Wait for on-chain confirmation
+
+### Verify Flow
+
+1. Open the verify page
+2. Enter a product ID
+3. Load the on-chain record
+4. Display the product details and verification status
+
+## Demo Video Flow
+
+For the submission video, show this sequence:
+
+1. Open the deployed app
+2. Connect the wallet extension
+3. Register a product
+4. Open the verify page
+5. Search by product ID
+6. Show the on-chain result and product details
+
+Keep the video short and clear. The hackathon brief values a functioning MVP and a smooth explanation.
+
+## Deployment Requirements
+
+Before deployment, make sure you have:
+
+- A deployed Portaldot contract
+- The generated contract metadata JSON uploaded to the app
+- The deployed contract address placed in `index.html`
+- A wallet extension installed in the browser
+- POT available for gas on the wallet
+
+## Setup
+
+### 1. Contract metadata
+
+After building the ink! contract, upload the generated metadata file to:
+
+`deploy/assets/portaltrace.contract.json`
+
+### 2. Configure the app
+
+Edit `deploy/index.html` and set:
+
+- `rpcEndpoint`
+- `contractAddress`
+- `contractMetadataUrl`
+
+### 3. Deploy to Vercel
+
+Set the Vercel project root to `/deploy` and redeploy.
+
+## How To Use
+
+### For users
+
+1. Open the deployed URL
+2. Click **Connect Wallet**
+3. Register a product or open the verify page
+4. Enter a product ID to verify
+
+### For judges
+
+1. Open the deployed URL
+2. Verify that wallet connect works
+3. Register a product live on-chain
+4. Open the verify page and confirm the record
+
+## Judging Criteria Alignment
+
+### Portaldot Native Deployment
+
+PortalTrace is designed to run against Portaldot and use POT gas. This is the mandatory eligibility requirement.
+
+### Demo Completion
+
+The app includes a full register and verify flow that can be demonstrated live.
+
+### Application Value
+
+The product addresses counterfeiting, provenance, and trust in supply chains.
+
+### Presentation Quality
+
+The flow is simple:
+wallet connect -> register -> verify -> show on-chain result.
+
+## Submission Checklist
+
+- [ ] GitHub repo link ready
+- [ ] README includes problem, solution, and demo flow
+- [ ] Demo video recorded
+- [ ] Contract deployed on Portaldot
+- [ ] POT gas available in wallet
+- [ ] Frontend deployed and reachable
+- [ ] Contract metadata uploaded
+- [ ] Verified register and verify flow works
+
+## Troubleshooting
+
+### Wallet does not connect
+
+- Install the supported wallet extension
+- Unlock the wallet
+- Refresh the page
+
+### Register fails
+
+- Check the contract address
+- Check the metadata JSON path
+- Make sure POT is available for gas
+
+### Verify fails
+
+- Confirm the product ID exists on-chain
+- Confirm the contract is deployed correctly
+- Check the browser console for RPC or metadata errors
+
+## Open Source
+
+Core contract code should remain open source as required by the hackathon rules.
+
+## Short Pitch
+
+PortalTrace is a Portaldot-native supply-chain verification MVP that lets anyone register and verify products on-chain using POT gas and a simple browser UI.
